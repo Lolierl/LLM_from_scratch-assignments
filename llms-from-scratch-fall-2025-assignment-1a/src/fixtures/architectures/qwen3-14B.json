@@ -1,0 +1,10 @@
+{
+    "vocab_size": 151936,
+    "embed_dim": 5120,
+    "inter_dim": 17408,
+    "num_attention_heads": 40,
+    "num_key_value_heads": 8,
+    "head_dim": 128,
+    "n_layers": 40,
+    "rope_theta": 1000000.0
+}
