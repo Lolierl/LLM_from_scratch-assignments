@@ -171,6 +171,44 @@ def test_sigmoid_attention(n, time_limit_ratio, capsys):
             torch_ms = do_bench(lambda: naive_sigmoid_attention_torch(q, k, v))
             check_time_limit(ms, torch_ms, ratio=time_limit_ratio)
 
+def naive_sigmoid_attention_torch_v2(q: torch.Tensor, k: torch.Tensor, v: torch.Tensor):
+    factor = q.shape[1] ** -0.5
+    return (torch.sigmoid((q @ k.T) * factor).to(torch.float16) @ v) / q.shape[0]
+
+@pytest.mark.parametrize("n, time_limit_ratio", [
+    (1, 0),
+    (2, 0),
+    (3, 0),
+    (50, 0),
+    (100, 0),
+    (128, 0),
+    (8000, 0.9),
+    (10000, 0.8),
+    (20000, 0.7),
+    (40000, 0.6),
+])
+@torch.no_grad()
+def test_sigmoid_attention_v2(n, time_limit_ratio, capsys):
+    """
+    Test the sigmoid_attention function.
+    Your implementation should be "flash"!
+    """
+
+    with capsys.disabled():
+        d = 128
+        q = torch.randn((n, d), device='cuda', dtype=torch.float16)
+        k = torch.randn((n, d), device='cuda', dtype=torch.float16)
+        v = torch.randn((n, d), device='cuda', dtype=torch.float16)
+        print(f"\n>>> Testing sigmoid_attention with n={n}")
+        
+        out = run_first_call_very_carefully(sigmoid_attention, q, k, v)
+        ans = naive_sigmoid_attention_torch(q, k, v)
+        check_same_tensor(ans, out, eps=1e-3)
+        
+        if time_limit_ratio > 0:
+            ms = do_bench(lambda: sigmoid_attention(q, k, v))
+            torch_ms = do_bench(lambda: naive_sigmoid_attention_torch_v2(q, k, v))
+            check_time_limit(ms, torch_ms, ratio=time_limit_ratio)
 
 @torch.compile
 def log_softmax_torch(x: torch.Tensor, T: float):
