@@ -46,7 +46,7 @@ def main():
             "num_key_value_heads": 4,
             "head_dim": 64,
             "n_layers": 12,
-            "rope_theta": 1_000_000.0,
+            "rope_theta": 10000.0,
         }
 
     cfg = CustomModelConfig(**model_args)

@@ -63,28 +63,13 @@ class CustomModelForCausalLM(PreTrainedModel):
             past_key_values=past_key_values,
         )
 
-        loss = None
-        if labels is not None:
-            shift_logits = logits[..., :-1, :].contiguous()
-            shift_labels = labels[..., 1:].contiguous()
-            loss = F.cross_entropy(
-                shift_logits.view(-1, shift_logits.size(-1)),
-                shift_labels.view(-1),
-                ignore_index=-100,
-            )
-
-        if not return_dict:
-            output = (logits,)
-            return ((loss,) + output) if loss is not None else output
-
         return CausalLMOutputWithPast(
-            loss=loss,
+            loss=None,
             logits=logits,
             past_key_values=None,
             hidden_states=None,
             attentions=None,
         )
-
     @torch.no_grad()
     def generate(
         self,
