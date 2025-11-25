@@ -4,7 +4,7 @@ from torch import nn
 import torch.nn.functional as F
 from dataclasses import dataclass
 from typing import Dict, Optional, Literal, Tuple
-
+import math
 @dataclass
 class ModelArgs:
     vocab_size: int
@@ -50,13 +50,12 @@ class RMSNorm(nn.Module):
 class MLP(nn.Module): 
     def __init__(self, embed_dim: int, inter_dim: int):
         super().__init__()
-        self.gate_proj = Linear(embed_dim, inter_dim)
         self.up_proj = Linear(embed_dim, inter_dim)
         self.down_proj = Linear(inter_dim, embed_dim)
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))
-
+        return self.down_proj(F.silu(self.up_proj(x)))
+        
 class RotaryEmbedding(nn.Module):
     def __init__(self, head_dim: int, theta: float = 100000.0):
         super().__init__()
@@ -139,6 +138,13 @@ class MHA(nn.Module):
         if past_key_values is not None:
             past_key_values.update(self.layer_idx, k, v)
             k, v = past_key_values.get(self.layer_idx)
+        
+        repeat = self.num_attention_heads // self.num_key_value_heads
+        if repeat > 1:
+            k = k.repeat_interleave(repeat, dim=1)
+            v = v.repeat_interleave(repeat, dim=1)
+        if attention_mask.dim() == 3:  # (B, L, L)
+            attention_mask = attention_mask.unsqueeze(1)
         attn_output = F.scaled_dot_product_attention(q, k, v, attention_mask).contiguous().transpose(1, 2).reshape(B, L, self.num_attention_heads * self.head_dim)
         return self.o_proj(attn_output)
 
