@@ -1,0 +1,17 @@
+{
+  "hellaswag": {
+    "num_examples": 10042,
+    "accuracy": 0.3331009759012149,
+    "accuracy_len_norm": 0.400318661621191
+  },
+  "lambada": {
+    "num_examples": 4869,
+    "accuracy": 0.3097145204354077,
+    "avg_nll": 2.8372369352650755
+  },
+  "arc_easy": {
+    "num_examples": 2376,
+    "accuracy": 0.6026936026936027,
+    "accuracy_len_norm": 0.539983164983165
+  }
+}

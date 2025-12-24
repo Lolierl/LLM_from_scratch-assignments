@@ -1,0 +1,22 @@
+name: llms_from_scratch_1a
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - psutil
+  - pytest
+  - regex
+  - tqdm
+  - pip:
+    - torch
+    - torchvision
+    - torchaudio
+    - einops
+    - einx
+    - jaxtyping
+    - transformers
+    - tiktoken
+    - wandb
